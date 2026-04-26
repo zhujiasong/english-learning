@@ -1,24 +1,24 @@
-ARG BUN_IMAGE=oven/bun:1
 ARG NODE_IMAGE=node:22-slim
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-FROM ${BUN_IMAGE} AS deps
+FROM ${NODE_IMAGE} AS deps
 
 ARG NPM_REGISTRY
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --registry=${NPM_REGISTRY}
+COPY package.json ./
+RUN npm config set registry ${NPM_REGISTRY} \
+  && npm install --include=dev --no-audit --no-fund
 
 FROM deps AS builder
 
 WORKDIR /app
 
 COPY . .
-RUN bun run db:generate
-RUN bun run db:setup
-RUN bun run build
+RUN npm run db:generate
+RUN npm run db:setup
+RUN npm run build
 RUN rm -f .next/standalone/.env .next/standalone/.env.*
 
 FROM ${NODE_IMAGE} AS runner
