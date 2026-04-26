@@ -86,7 +86,7 @@ export function KnowledgeTree() {
         const firstLevelIds = new Set(data.map((n) => n.id))
         setExpanded(firstLevelIds)
       })
-      .catch(console.error)
+      .catch(() => setTree([]))
       .finally(() => setLoading(false))
   }, [])
 

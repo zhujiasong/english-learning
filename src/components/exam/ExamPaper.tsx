@@ -30,7 +30,7 @@ export function ExamPaperView({ paperId }: { paperId: string }) {
     fetch(`/api/exam/${paperId}`)
       .then((r) => r.json())
       .then((data) => setPaper(data))
-      .catch(console.error)
+      .catch(() => setPaper(null))
       .finally(() => setLoading(false))
   }, [paperId])
 

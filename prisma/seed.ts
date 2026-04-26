@@ -4,6 +4,10 @@ import { guizhouSyllabus, type KnowledgeNodeSeed } from '../src/lib/syllabus/gui
 
 const adapter = new PrismaLibSql({ url: 'file:./prisma/dev.db' })
 const prisma = new PrismaClient({ adapter })
+const verbose = process.env.SEED_VERBOSE === '1'
+const log = (...args: unknown[]) => {
+  if (verbose) console.log(...args)
+}
 
 async function createKnowledgeNodes(
   nodes: KnowledgeNodeSeed[],
@@ -142,27 +146,27 @@ async function createSampleExamPapers(): Promise<void> {
     }
 
     await prisma.question.createMany({ data: questions })
-    console.log(`已创建：${paperData.title}（${questionCount}题）`)
+    log(`已创建：${paperData.title}（${questionCount}题）`)
   }
 }
 
 async function main() {
-  console.log('开始填充种子数据...')
+  log('开始填充种子数据...')
 
   await prisma.question.deleteMany()
   await prisma.examPaper.deleteMany()
   await prisma.knowledgeNode.deleteMany()
 
-  console.log('创建知识点结构...')
+  log('创建知识点结构...')
   await createKnowledgeNodes(guizhouSyllabus)
 
-  console.log('创建样卷...')
+  log('创建样卷...')
   await createSampleExamPapers()
 
   const nodeCount = await prisma.knowledgeNode.count()
   const paperCount = await prisma.examPaper.count()
 
-  console.log(`种子数据填充完成! ${nodeCount} 个知识点, ${paperCount} 套试卷`)
+  log(`种子数据填充完成! ${nodeCount} 个知识点, ${paperCount} 套试卷`)
 }
 
 main()

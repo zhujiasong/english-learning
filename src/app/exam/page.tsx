@@ -19,7 +19,7 @@ export default function ExamListPage() {
     fetch('/api/exam')
       .then((r) => r.json())
       .then((data) => setPapers(data))
-      .catch(console.error)
+      .catch(() => setPapers([]))
       .finally(() => setLoading(false))
   }, [])
 

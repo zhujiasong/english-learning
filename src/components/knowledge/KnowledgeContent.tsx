@@ -33,8 +33,8 @@ export function KnowledgeContent({ id }: { id: string }) {
       const res = await fetch(`/api/knowledge/${id}`)
       const data = await res.json()
       setNode(data)
-    } catch (err) {
-      console.error(err)
+    } catch {
+      setNode(null)
     } finally {
       setLoading(false)
     }
