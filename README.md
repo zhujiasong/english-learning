@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 贵州中考英语 AI 辅导
 
-## Getting Started
+这是一个基于 Next.js 的英语学习系统，面向贵州中考英语复习场景，包含知识点学习、真题模拟、作文练习、划线提问、翻译朗读和 AI 问答等功能。
 
-First, run the development server:
+## 环境要求
+
+推荐环境：
+
+- Node.js 22+
+- npm 10+
+- Ubuntu 22.04/24.04、macOS 或其他可运行 Node.js 的系统
+
+项目使用 SQLite 作为本地知识点/试题元数据数据库，默认文件路径为：
+
+```env
+DATABASE_URL=file:./prisma/dev.db
+```
+
+AI 提供商、模型和 API Key 在网页「模型配置」里填写，保存在浏览器本地，不需要写入服务器 `.env`。
+
+## 本地启动
+
+首次拉取代码后执行：
+
+```bash
+npm install
+```
+
+创建 `.env`：
+
+```bash
+cat > .env <<'EOF'
+DATABASE_URL=file:./prisma/dev.db
+EOF
+```
+
+初始化数据库：
+
+```bash
+npm run db:setup
+```
+
+启动开发服务：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+浏览器打开：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Ubuntu 一键初始化
 
-## Learn More
+Ubuntu 服务器或新机器可以直接执行：
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+脚本会完成：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 检查并安装 Node.js 22
+- 安装项目依赖
+- 创建默认 `.env`
+- 执行 Prisma 生成和数据库初始化
 
-## Deploy on Vercel
+执行完成后启动开发服务：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 生产构建和运行
+
+本地或服务器上可以执行：
+
+```bash
+npm run build
+npm start
+```
+
+默认端口为 `3000`。
+
+## Docker 部署
+
+构建镜像：
+
+```bash
+docker build -t english-learning .
+```
+
+运行容器：
+
+```bash
+docker run -d \
+  --name english-learning \
+  -p 3000:3000 \
+  english-learning
+```
+
+访问：
+
+```text
+http://服务器IP:3000
+```
+
+更多 Docker 部署命令见：
+
+```text
+docker-deploy.md
+```
+
+## 常用命令
+
+```bash
+npm run dev        # 开发模式
+npm run build      # 生产构建
+npm start          # 启动生产服务
+npm run lint       # 代码检查
+npm run db:setup   # 初始化/重置本地数据库并写入种子数据
+npm run db:push    # 同步 Prisma schema 到数据库
+npm run db:seed    # 写入种子数据
+```
+
+## Git 注意事项
+
+以下文件不会进入 Git：
+
+- `.env`
+- `.next/`
+- `node_modules/`
+- `prisma/dev.db`
+- `tsconfig.tsbuildinfo`
+- `next-env.d.ts`
+
+这是正常的。新环境拉取代码后，需要重新执行依赖安装和数据库初始化。
