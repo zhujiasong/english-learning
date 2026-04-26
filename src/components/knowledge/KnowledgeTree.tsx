@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { hasCachedKnowledgeContent } from '@/lib/cache/knowledgeContent'
 
 interface TreeNode {
   id: string
@@ -9,6 +10,7 @@ interface TreeNode {
   level: number
   category: string
   contentGenerated: boolean
+  updatedAt: string
   children?: TreeNode[]
 }
 
@@ -25,13 +27,18 @@ function TreeNodeItem({
   node,
   expanded,
   onToggle,
+  activeId,
+  compact = false,
 }: {
   node: TreeNode
   expanded: Set<string>
   onToggle: (id: string) => void
+  activeId?: string
+  compact?: boolean
 }) {
   const hasChildren = node.children && node.children.length > 0
   const isExpanded = expanded.has(node.id)
+  const isActive = node.id === activeId
 
   return (
     <li>
@@ -39,21 +46,25 @@ function TreeNodeItem({
         {hasChildren ? (
           <button
             onClick={() => onToggle(node.id)}
-            className="flex h-5 w-5 items-center justify-center rounded text-xs text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
           >
             {isExpanded ? '▾' : '▸'}
           </button>
         ) : (
-          <span className="w-5" />
+          <span className="w-5 shrink-0" />
         )}
         <Link
           href={`/knowledge/${node.id}`}
-          className="group flex flex-1 items-center gap-2 rounded px-2 py-0.5 text-sm text-zinc-700 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-300 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+          className={`group flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-0.5 text-sm transition-colors ${
+            isActive
+              ? 'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
+              : 'text-zinc-700 hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-300 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
+          }`}
         >
-          <span className="text-xs">{categoryIcons[node.category] || '📄'}</span>
-          <span>{node.title}</span>
-          {node.contentGenerated && (
-            <span className="ml-auto text-[10px] text-green-500">已生成</span>
+          <span className="shrink-0 text-xs">{categoryIcons[node.category] || '📄'}</span>
+          <span className="min-w-0 flex-1 truncate">{node.title}</span>
+          {node.contentGenerated && !compact && (
+            <span className="ml-auto shrink-0 text-[10px] text-green-500">已生成</span>
           )}
         </Link>
       </div>
@@ -65,6 +76,8 @@ function TreeNodeItem({
               node={child}
               expanded={expanded}
               onToggle={onToggle}
+              activeId={activeId}
+              compact={compact}
             />
           ))}
         </ul>
@@ -73,7 +86,30 @@ function TreeNodeItem({
   )
 }
 
-export function KnowledgeTree() {
+function applyLocalContentState(nodes: TreeNode[]): TreeNode[] {
+  return nodes.map((node) => ({
+    ...node,
+    contentGenerated: hasCachedKnowledgeContent(node.id, node.updatedAt),
+    children: node.children ? applyLocalContentState(node.children) : undefined,
+  }))
+}
+
+function findPathToNode(nodes: TreeNode[], targetId: string): string[] {
+  for (const node of nodes) {
+    if (node.id === targetId) return [node.id]
+    const childPath = findPathToNode(node.children ?? [], targetId)
+    if (childPath.length > 0) return [node.id, ...childPath]
+  }
+  return []
+}
+
+export function KnowledgeTree({
+  activeId,
+  compact = false,
+}: {
+  activeId?: string
+  compact?: boolean
+}) {
   const [tree, setTree] = useState<TreeNode[]>([])
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -82,13 +118,27 @@ export function KnowledgeTree() {
     fetch('/api/knowledge')
       .then((r) => r.json())
       .then((data: TreeNode[]) => {
-        setTree(data)
-        const firstLevelIds = new Set(data.map((n) => n.id))
-        setExpanded(firstLevelIds)
+        const localTree = applyLocalContentState(data)
+        setTree(localTree)
+        setExpanded(new Set())
       })
       .catch(() => setTree([]))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!activeId || tree.length === 0) return
+
+    const activePath = findPathToNode(tree, activeId)
+    if (activePath.length === 0) return
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      activePath.forEach((id) => next.add(id))
+      return next
+    })
+  }, [activeId, tree])
 
   const toggle = (id: string) => {
     setExpanded((prev) => {
@@ -119,6 +169,8 @@ export function KnowledgeTree() {
             node={node}
             expanded={expanded}
             onToggle={toggle}
+            activeId={activeId}
+            compact={compact}
           />
         ))}
       </ul>

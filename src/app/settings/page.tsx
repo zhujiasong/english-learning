@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSettings } from '@/lib/store/settings'
 import { getAllProviderConfigs } from '@/lib/ai'
 import { Select } from '@/components/ui/Select'
@@ -28,8 +28,35 @@ export default function SettingsPage() {
   )
 
   const handleProviderChange = (provider: string) => {
-    updateSettings({ provider, model: '' })
+    const nextModels = providerConfigs.find((p) => p.id === provider)?.models ?? []
+    updateSettings({ provider, model: nextModels[0]?.id ?? '' })
   }
+
+  useEffect(() => {
+    const activeProvider = providerConfigs.find((p) => p.id === settings.provider)
+    const nextProvider = activeProvider ?? providerConfigs[0]
+
+    if (!nextProvider) {
+      return
+    }
+
+    if (!settings.provider || !activeProvider) {
+      updateSettings({
+        provider: nextProvider.id,
+        model: nextProvider.models[0]?.id ?? '',
+      })
+      return
+    }
+
+    if (nextProvider.models.length === 0) {
+      return
+    }
+
+    const modelExists = nextProvider.models.some((model) => model.id === settings.model)
+    if (!modelExists) {
+      updateSettings({ model: nextProvider.models[0].id })
+    }
+  }, [settings.provider, settings.model, providerConfigs, updateSettings])
 
   return (
     <div>
@@ -55,11 +82,12 @@ export default function SettingsPage() {
             模型
           </label>
           <Select
+            key={settings.provider || 'model-empty'}
             options={modelOptions}
             value={settings.model}
             onChange={(model) => updateSettings({ model })}
             placeholder="选择模型"
-            disabled={!settings.provider}
+            disabled={!settings.provider || modelOptions.length === 0}
           />
           {settings.provider === 'deepseek' && (
             <p className="mt-1 text-xs text-zinc-400">

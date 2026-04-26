@@ -28,21 +28,25 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AISettings>(defaultSettings)
 
   useEffect(() => {
-    const stored = localStorage.getItem('ai-settings')
-    if (stored) {
-      try {
+    try {
+      const stored = localStorage.getItem('ai-settings')
+      if (stored) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSettings((prev) => ({ ...prev, ...JSON.parse(stored) }))
-      } catch {
-        // ignore
       }
+    } catch {
+      // Some mobile browsers or embedded webviews can block localStorage.
     }
   }, [])
 
   const updateSettings = useCallback((partial: Partial<AISettings>) => {
     setSettings((prev) => {
       const next = { ...prev, ...partial }
-      localStorage.setItem('ai-settings', JSON.stringify(next))
+      try {
+        localStorage.setItem('ai-settings', JSON.stringify(next))
+      } catch {
+        // Keep the in-memory settings usable even if persistence is blocked.
+      }
       return next
     })
   }, [])

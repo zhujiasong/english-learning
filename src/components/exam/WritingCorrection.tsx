@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { AIPanel } from '@/components/ai/AIPanel'
+import { useGlobalAIPanel } from '@/components/ai/GlobalAIPanel'
 import { buildWritingHintPrompt, buildWritingCorrectionPrompt } from '@/lib/prompts/writing'
 import { useSettings } from '@/lib/store/settings'
 import { createProvider } from '@/lib/ai'
@@ -15,13 +15,11 @@ interface WritingTask {
 
 export function WritingCorrection({ task }: { task: WritingTask }) {
   const { settings } = useSettings()
+  const { ask } = useGlobalAIPanel()
   const [essay, setEssay] = useState('')
   const [correctionResult, setCorrectionResult] = useState('')
   const [correcting, setCorrecting] = useState(false)
   const [correctionError, setCorrectionError] = useState('')
-  const [showHint, setShowHint] = useState(false)
-  const [showSelectionQuestion, setShowSelectionQuestion] = useState(false)
-  const [selectedText, setSelectedText] = useState('')
   const [wordCount, setWordCount] = useState(0)
 
   const handleEssayChange = (text: string) => {
@@ -86,25 +84,28 @@ export function WritingCorrection({ task }: { task: WritingTask }) {
     }
   }, [essay, settings, task.title, task.requirement])
 
-  const selectionPrompt = `学生在作文练习中选中了一段内容。请用中文解释这段内容，指出它和作文题目的关系；如果包含英语表达，请说明意思、用法和可改进点。
+  const handleHint = useCallback(() => {
+    ask(buildWritingHintPrompt(task.title, task.requirement), { title: '写作提示' })
+  }, [ask, task.title, task.requirement])
+
+  const handleSelectionQuestion = useCallback((text: string) => {
+    const selectionPrompt = `学生在作文练习中选中了一段内容。请用中文解释这段内容，指出它和作文题目的关系；如果包含英语表达，请说明意思、用法和可改进点。
 
 作文题目：${task.title}
 写作要求：
 ${task.requirement}
 
 选中文本：
-"${selectedText}"
+"${text}"
 
 请控制在200字以内。`
+    ask(selectionPrompt, { title: 'AI 解答' })
+  }, [ask, task.title, task.requirement])
+
 
   return (
     <div>
-      <SelectionToolbar
-        onQuestion={(text) => {
-          setSelectedText(text)
-          setShowSelectionQuestion(true)
-        }}
-      />
+      <SelectionToolbar onQuestion={handleSelectionQuestion} />
       <div className="mb-4">
         <h3 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
           {task.title}
@@ -113,7 +114,7 @@ ${task.requirement}
           {task.requirement}
         </p>
         <button
-          onClick={() => setShowHint(true)}
+          onClick={handleHint}
           className="mt-2 rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
         >
           AI 写作提示
@@ -174,18 +175,6 @@ ${task.requirement}
         </div>
       )}
 
-      <AIPanel
-        open={showHint}
-        onClose={() => setShowHint(false)}
-        title="写作提示"
-        initialMessage={buildWritingHintPrompt(task.title, task.requirement)}
-      />
-      <AIPanel
-        open={showSelectionQuestion}
-        onClose={() => setShowSelectionQuestion(false)}
-        title="AI 解答"
-        initialMessage={selectionPrompt}
-      />
     </div>
   )
 }

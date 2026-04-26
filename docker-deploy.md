@@ -5,15 +5,42 @@
 在云服务器进入项目根目录后执行：
 
 ```bash
-docker build -t milo-test .
+docker build -t english-learning .
 ```
+
+如果云服务器拉 npm 依赖困难，可以改用“本地预构建产物”方式。先在本地执行：
+
+```bash
+npm install
+npm run db:setup
+npm run build
+```
+
+确认生成 `.next/standalone` 后，把整个项目目录上传到云服务器，或者至少上传这些内容：
+
+```text
+.next/standalone
+.next/static
+public
+prisma
+Dockerfile.prebuilt
+Dockerfile.prebuilt.dockerignore
+```
+
+然后在云服务器执行：
+
+```bash
+docker build -f Dockerfile.prebuilt -t english-learning .
+```
+
+这种方式不会在云服务器执行 `npm install`，只需要拉取 `node:22-slim` 基础镜像。
 
 如果 npm 官方源访问慢，可以指定 registry：
 
 ```bash
 docker build \
   --build-arg NPM_REGISTRY=https://registry.npmmirror.com \
-  -t milo-test .
+  -t english-learning .
 ```
 
 如果镜像源缺包，换回官方源：
@@ -21,17 +48,17 @@ docker build \
 ```bash
 docker build \
   --build-arg NPM_REGISTRY=https://registry.npmjs.org/ \
-  -t milo-test .
+  -t english-learning .
 ```
 
 ## 2. 启动容器
 
 ```bash
 docker run -d \
-  --name milo-test \
+  --name english-learning \
   -p 3000:3000 \
   --restart unless-stopped \
-  milo-test
+  english-learning
 ```
 
 访问：
@@ -43,20 +70,20 @@ http://服务器IP:3000
 ## 3. 查看日志
 
 ```bash
-docker logs -f milo-test
+docker logs -f english-learning
 ```
 
 ## 4. 停止和删除
 
 ```bash
-docker stop milo-test
-docker rm milo-test
+docker stop english-learning
+docker rm english-learning
 ```
 
 强制删除：
 
 ```bash
-docker rm -f milo-test
+docker rm -f english-learning
 ```
 
 ## 5. 更新部署
@@ -64,13 +91,13 @@ docker rm -f milo-test
 拉取或上传新代码后，在项目根目录执行：
 
 ```bash
-docker rm -f milo-test
-docker build -t milo-test .
+docker rm -f english-learning
+docker build -t english-learning .
 docker run -d \
-  --name milo-test \
+  --name english-learning \
   -p 3000:3000 \
   --restart unless-stopped \
-  milo-test
+  english-learning
 ```
 
 ## 6. 使用持久化数据库目录
@@ -78,7 +105,7 @@ docker run -d \
 当前镜像会在构建时初始化 SQLite 数据库。若希望 AI 生成的知识点内容长期保留，建议挂载 `prisma` 目录：
 
 ```bash
-mkdir -p /data/milo-test/prisma
+mkdir -p /data/english-learning/prisma
 ```
 
 首次部署可以先不挂载，确认运行正常后再规划数据迁移。若直接挂载空目录，容器内构建好的 `prisma/dev.db` 会被覆盖，需要提前把数据库文件放到挂载目录。
@@ -87,11 +114,11 @@ mkdir -p /data/milo-test/prisma
 
 ```bash
 docker run -d \
-  --name milo-test \
+  --name english-learning \
   -p 3000:3000 \
-  -v /data/milo-test/prisma:/app/prisma \
+  -v /data/english-learning/prisma:/app/prisma \
   --restart unless-stopped \
-  milo-test
+  english-learning
 ```
 
 ## 7. Nginx 反向代理
@@ -133,7 +160,7 @@ docker ps -a
 进入容器：
 
 ```bash
-docker exec -it milo-test sh
+docker exec -it english-learning sh
 ```
 
 查看镜像：

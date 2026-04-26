@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { AIPanel } from '@/components/ai/AIPanel'
+import { useCallback, useState } from 'react'
+import { useGlobalAIPanel } from '@/components/ai/GlobalAIPanel'
 import { buildHintSystemPrompt, buildHintUserPrompt } from '@/lib/prompts/hint'
 import { SelectionToolbar } from '@/components/ai/SelectionToolbar'
 
@@ -27,10 +27,8 @@ const typeLabels: Record<string, string> = {
 
 export function QuestionCard({ question }: { question: Question }) {
   const [showAnswer, setShowAnswer] = useState(false)
-  const [showHint, setShowHint] = useState(false)
-  const [showSelectionQuestion, setShowSelectionQuestion] = useState(false)
-  const [selectedText, setSelectedText] = useState('')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const { ask } = useGlobalAIPanel()
 
   const hintPrompt = buildHintUserPrompt(
     question.stem,
@@ -40,25 +38,31 @@ export function QuestionCard({ question }: { question: Question }) {
   )
 
   const hintSystem = buildHintSystemPrompt()
-  const selectionPrompt = `学生在做下面这道${typeLabels[question.type] || question.type}题时，选中了其中一段内容。请用中文解释这段内容的含义、相关语法或解题线索，适合贵州初中生理解。不要直接给出整题答案。
+
+  const handleHint = useCallback(() => {
+    ask(hintPrompt.content, {
+      title: 'AI 点拨',
+      systemPrompt: hintSystem.content,
+    })
+  }, [ask, hintPrompt.content, hintSystem.content])
+
+  const handleSelectionQuestion = useCallback((text: string) => {
+    const selectionPrompt = `学生在做下面这道${typeLabels[question.type] || question.type}题时，选中了其中一段内容。请用中文解释这段内容的含义、相关语法或解题线索，适合贵州初中生理解。不要直接给出整题答案。
 
 题目：
 ${question.stem}
 ${question.options?.length ? `\n选项：\n${question.options.join('\n')}` : ''}
 
 选中文本：
-"${selectedText}"
+"${text}"
 
 请控制在200字以内。`
+    ask(selectionPrompt, { title: 'AI 解答' })
+  }, [ask, question.options, question.stem, question.type])
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
-      <SelectionToolbar
-        onQuestion={(text) => {
-          setSelectedText(text)
-          setShowSelectionQuestion(true)
-        }}
-      />
+      <SelectionToolbar onQuestion={handleSelectionQuestion} />
 
       <div className="mb-3 flex items-center gap-2">
         <span className="rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400">
@@ -110,7 +114,7 @@ ${question.options?.length ? `\n选项：\n${question.options.join('\n')}` : ''}
 
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setShowHint(true)}
+          onClick={handleHint}
           className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
         >
           AI 点拨
@@ -126,19 +130,6 @@ ${question.options?.length ? `\n选项：\n${question.options.join('\n')}` : ''}
         )}
       </div>
 
-      <AIPanel
-        open={showHint}
-        onClose={() => setShowHint(false)}
-        title="AI 点拨"
-        systemPrompt={hintSystem.content}
-        initialMessage={hintPrompt.content}
-      />
-      <AIPanel
-        open={showSelectionQuestion}
-        onClose={() => setShowSelectionQuestion(false)}
-        title="AI 解答"
-        initialMessage={selectionPrompt}
-      />
     </div>
   )
 }

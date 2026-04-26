@@ -26,29 +26,3 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const body = await req.json()
-    const { content } = body
-
-    if (content === undefined) {
-      return NextResponse.json({ error: '缺少 content' }, { status: 400 })
-    }
-
-    const node = await prisma.knowledgeNode.update({
-      where: { id },
-      data: {
-        content,
-        contentGenerated: true,
-      },
-    })
-
-    return NextResponse.json(node)
-  } catch {
-    return NextResponse.json({ error: '更新知识点失败' }, { status: 500 })
-  }
-}

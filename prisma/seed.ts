@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { PrismaLibSql } from '@prisma/adapter-libsql'
 import { guizhouSyllabus, type KnowledgeNodeSeed } from '../src/lib/syllabus/guizhou'
 
@@ -89,7 +89,7 @@ async function createSampleExamPapers(): Promise<void> {
       },
     })
 
-    const questions = []
+    const questions: Prisma.QuestionCreateManyInput[] = []
     const questionCount = 6 + Math.floor(Math.random() * 3) // 6-8题
 
     for (let i = 1; i <= questionCount; i++) {
@@ -113,9 +113,9 @@ async function createSampleExamPapers(): Promise<void> {
           paperId: paper.id,
           type: 'cloze',
           stem: q.stem,
-          options: q.options as any,
-          answer: q.answer as any,
-          explanation: q.explanation as any,
+          options: q.options,
+          answer: q.answer,
+          explanation: q.explanation,
           sortOrder: i,
         })
       } else if (rand < 0.95) {
@@ -125,9 +125,9 @@ async function createSampleExamPapers(): Promise<void> {
           paperId: paper.id,
           type: 'reading',
           stem: q.stem,
-          options: q.options as any,
-          answer: q.answer as any,
-          explanation: q.explanation as any,
+          options: q.options,
+          answer: q.answer,
+          explanation: q.explanation,
           sortOrder: i,
         })
       } else {
@@ -137,9 +137,9 @@ async function createSampleExamPapers(): Promise<void> {
           paperId: paper.id,
           type: 'writing',
           stem: q.stem,
-          options: q.options as any,
-          answer: q.answer as any,
-          explanation: q.explanation as any,
+          options: q.options,
+          answer: q.answer,
+          explanation: q.explanation,
           sortOrder: i,
         })
       }

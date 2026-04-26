@@ -5,12 +5,15 @@ import { useAIStream } from '@/lib/hooks/useAIStream'
 import type { ChatMessage } from '@/lib/ai'
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 
+const MAX_CONTEXT_MESSAGES = 8
+
 interface AIPanelProps {
   open: boolean
   onClose: () => void
   title: string
   systemPrompt?: string
   initialMessage?: string
+  initialMessageKey?: string | number
 }
 
 export function AIPanel({
@@ -19,6 +22,7 @@ export function AIPanel({
   title,
   systemPrompt,
   initialMessage,
+  initialMessageKey,
 }: AIPanelProps) {
   const { streamChat } = useAIStream()
   const [messages, setMessages] = useState<
@@ -28,7 +32,7 @@ export function AIPanel({
   const [loading, setLoading] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const initialCalled = useRef(false)
+  const lastInitialKey = useRef<string | number | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -52,47 +56,51 @@ export function AIPanel({
     }
   }, [open])
 
-  const startInitial = useCallback(async () => {
-    if (!initialMessage || initialCalled.current) return
-    initialCalled.current = true
+  const startInitial = useCallback(
+    async (message: string) => {
+      if (loading) return
 
-    const msg: ChatMessage[] = []
-    if (systemPrompt) msg.push({ role: 'system', content: systemPrompt })
-    msg.push({ role: 'user', content: initialMessage })
+      const nextMessages: { role: 'user' | 'assistant'; content: string }[] = [
+        ...messages,
+        { role: 'user', content: message },
+      ]
+      setMessages(nextMessages)
+      setLoading(true)
 
-    setMessages([{ role: 'user', content: initialMessage }])
-    setLoading(true)
+      const chatMessages: ChatMessage[] = []
+      if (systemPrompt) chatMessages.push({ role: 'system', content: systemPrompt })
+      chatMessages.push({ role: 'user', content: message })
 
-    try {
-      let fullText = ''
-      await streamChat(msg, (chunk) => {
-        fullText += chunk
+      try {
+        let fullText = ''
+        await streamChat(chatMessages, (chunk) => {
+          fullText += chunk
+          setMessages([...nextMessages, { role: 'assistant', content: fullText }])
+        })
+      } catch (err) {
         setMessages([
-          { role: 'user', content: initialMessage },
-          { role: 'assistant', content: fullText },
+          ...nextMessages,
+          {
+            role: 'assistant',
+            content: `错误: ${err instanceof Error ? err.message : '请求失败'}`,
+          },
         ])
-      })
-    } catch (err) {
-      setMessages([
-        { role: 'user', content: initialMessage },
-        {
-          role: 'assistant',
-          content: `错误: ${err instanceof Error ? err.message : '请求失败'}`,
-        },
-      ])
-    } finally {
-      setLoading(false)
-    }
-  }, [initialMessage, systemPrompt, streamChat])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [loading, messages, systemPrompt, streamChat]
+  )
 
   useEffect(() => {
-    if (open && initialMessage) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMessages(() => [])
-      initialCalled.current = false
-      startInitial()
-    }
-  }, [open, initialMessage, startInitial])
+    if (!open || !initialMessage) return
+
+    const nextInitialKey = initialMessageKey ?? initialMessage
+    if (lastInitialKey.current === nextInitialKey) return
+
+    lastInitialKey.current = nextInitialKey
+    startInitial(initialMessage)
+  }, [open, initialMessage, initialMessageKey, startInitial])
 
   useEffect(() => {
     if (contentRef.current) {
@@ -114,8 +122,8 @@ export function AIPanel({
 
     const chatMessages: ChatMessage[] = []
     if (systemPrompt) chatMessages.push({ role: 'system', content: systemPrompt })
-    for (const msg of newMessages) {
-      chatMessages.push({ role: msg.role as 'user' | 'assistant', content: msg.content })
+    for (const msg of newMessages.slice(-MAX_CONTEXT_MESSAGES)) {
+      chatMessages.push({ role: msg.role, content: msg.content })
     }
 
     try {
