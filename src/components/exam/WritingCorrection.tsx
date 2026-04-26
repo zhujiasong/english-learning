@@ -89,92 +89,173 @@ export function WritingCorrection({ task }: { task: WritingTask }) {
   }, [ask, task.title, task.requirement])
 
   const handleSelectionQuestion = useCallback((text: string) => {
-    const selectionPrompt = `学生在作文练习中选中了一段内容。请用中文解释这段内容，指出它和作文题目的关系；如果包含英语表达，请说明意思、用法和可改进点。
-
-作文题目：${task.title}
-写作要求：
-${task.requirement}
-
-选中文本：
-"${text}"
-
-请控制在200字以内。`
+    const selectionPrompt = [
+      '学生在作文练习中选中了一段内容。请用中文解释这段内容，指出它和作文题目的关系；如果包含英语表达，请说明意思、用法和可改进点。',
+      '',
+      '作文题目：' + task.title,
+      '写作要求：',
+      task.requirement,
+      '',
+      '选中文本：',
+      '"' + text + '"',
+      '',
+      '请控制在200字以内。',
+    ].join('\n')
     ask(selectionPrompt, { title: 'AI 解答' })
   }, [ask, task.title, task.requirement])
 
+  const targetWords = 80
+  const wordProgress = Math.min(Math.round((wordCount / targetWords) * 100), 100)
 
   return (
-    <div>
+    <div className="space-y-6">
       <SelectionToolbar onQuestion={handleSelectionQuestion} />
-      <div className="mb-4">
-        <h3 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          {task.title}
-        </h3>
-        <p className="rounded-lg bg-zinc-50 p-3 text-sm leading-relaxed text-zinc-600 dark:bg-zinc-700/50 dark:text-zinc-400">
-          {task.requirement}
-        </p>
-        <button
-          onClick={handleHint}
-          className="mt-2 rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
-        >
-          AI 写作提示
-        </button>
-      </div>
 
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            你的作文
-          </label>
-          <span className="text-xs text-zinc-400">
-            {wordCount} 词
-          </span>
+      <section className="sky-hero px-8 py-7">
+        <div className="grid gap-6 lg:grid-cols-[1fr_17rem]">
+          <div>
+            <div className="sky-hero-kicker">Writing Task</div>
+            <h1 className="sky-page-title mt-3 text-3xl font-semibold">
+              {task.title}
+            </h1>
+            <p className="sky-page-copy mt-3 max-w-2xl whitespace-pre-wrap text-sm leading-7">
+              {task.requirement}
+            </p>
+            <button
+              onClick={handleHint}
+              className="sky-button-secondary mt-5 rounded-full px-4 py-2 text-sm font-medium transition-colors"
+            >
+              AI 写作提示
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-sky-100 bg-white/70 p-4 dark:border-sky-900/50 dark:bg-slate-900/45">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-700/70 dark:text-cyan-200/70">
+              Writing Status
+            </div>
+            <div className="mt-4 flex items-end justify-between">
+              <div>
+                <div className="text-3xl font-semibold text-sky-700 dark:text-sky-200">
+                  {wordCount}
+                </div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-sky-100/60">
+                  当前词数
+                </div>
+              </div>
+              <div className="text-right text-xs text-slate-500 dark:text-sky-100/60">
+                目标约 {targetWords} 词
+              </div>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-sky-100 dark:bg-sky-950/70">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all"
+                style={{ width: wordProgress + '%' }}
+              />
+            </div>
+          </div>
         </div>
-        <textarea
-          value={essay}
-          onChange={(e) => handleEssayChange(e.target.value)}
-          placeholder="在这里输入你的作文..."
-          rows={10}
-          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm leading-relaxed text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-        />
-      </div>
+      </section>
 
-      <button
-        onClick={handleCorrect}
-        disabled={!essay.trim() || correcting}
-        className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {correcting ? (
-          <span className="flex items-center gap-2">
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            AI 批改中...
-          </span>
-        ) : (
-          '提交批改'
-        )}
-      </button>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="sky-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-sky-100/80 bg-white/40 px-5 py-4 dark:border-sky-900/50 dark:bg-sky-950/20">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700/70 dark:text-cyan-200/70">
+                Essay Draft
+              </div>
+              <label className="mt-1 block text-sm font-semibold text-sky-950 dark:text-sky-100">
+                你的作文
+              </label>
+            </div>
+            <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-100 dark:bg-sky-950/50 dark:text-sky-200 dark:ring-sky-900/60">
+              {wordCount} 词
+            </span>
+          </div>
+
+          <textarea
+            value={essay}
+            onChange={(e) => handleEssayChange(e.target.value)}
+            placeholder="在这里输入你的作文..."
+            rows={15}
+            className="block w-full resize-y border-0 bg-white/62 px-5 py-4 text-sm leading-8 text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:bg-slate-950/20 dark:text-sky-100"
+          />
+
+          <div className="flex items-center justify-between gap-3 border-t border-sky-100/80 bg-white/35 px-5 py-4 dark:border-sky-900/50 dark:bg-sky-950/20">
+            <p className="text-xs text-slate-500 dark:text-sky-100/60">
+              提交前可以先划线向 AI 追问表达、语法或句式问题。
+            </p>
+            <button
+              onClick={handleCorrect}
+              disabled={!essay.trim() || correcting}
+              className="sky-button-primary shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {correcting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  AI 批改中...
+                </span>
+              ) : (
+                '提交批改'
+              )}
+            </button>
+          </div>
+        </div>
+
+        <aside className="space-y-4">
+          <div className="sky-card p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700/70 dark:text-cyan-200/70">
+              Focus
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {['审题', '结构', '句式', '词汇', '语法', '得分点'].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-100 dark:bg-sky-950/50 dark:text-sky-200 dark:ring-sky-900/60"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="sky-card p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700/70 dark:text-cyan-200/70">
+              Tip
+            </div>
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-sky-100/75">
+              中考作文优先保证信息完整、结构清晰、句子正确，再尝试使用更丰富的连接词和高级表达。
+            </p>
+          </div>
+        </aside>
+      </section>
 
       {correctionError && (
-        <div className="mt-3 rounded bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300">
           {correctionError}
         </div>
       )}
 
       {correctionResult && (
-        <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
-          <h4 className="mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            批改结果
-          </h4>
-          <MarkdownRenderer
-            content={correctionResult}
-            className="correction-content text-sm leading-relaxed"
-          />
-        </div>
+        <section className="sky-card overflow-hidden">
+          <div className="border-b border-sky-100/80 bg-white/40 px-5 py-4 dark:border-sky-900/50 dark:bg-sky-950/20">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700/70 dark:text-cyan-200/70">
+              Correction Report
+            </div>
+            <h2 className="mt-1 text-sm font-semibold text-sky-950 dark:text-sky-100">
+              批改结果
+            </h2>
+          </div>
+          <div className="p-5">
+            <MarkdownRenderer
+              content={correctionResult}
+              className="correction-content text-sm leading-relaxed"
+            />
+          </div>
+        </section>
       )}
-
     </div>
   )
 }

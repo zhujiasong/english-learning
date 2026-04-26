@@ -210,28 +210,31 @@ export function KnowledgeContent({ id }: { id: string }) {
 
   if (!node) {
     return (
-      <div className="py-12 text-center text-zinc-500">知识点不存在</div>
+      <div className="sky-card py-12 text-center text-sm text-slate-500 dark:text-sky-100/70">知识点不存在</div>
     )
   }
 
 
   return (
-    <div className="relative">
+    <div className="relative space-y-6">
       <SelectionToolbar onQuestion={handleQuestion} />
 
-      <div className="mb-6">
-        <div className="text-xs text-zinc-500">
+      <section className="sky-hero px-8 py-7">
+        <div className="sky-hero-kicker">
           贵州中考 · {node.category}
           {node.parent?.title && ` > ${node.parent.title}`}
         </div>
-        <h1 className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+        <h1 className="sky-page-title mt-3 text-3xl font-semibold">
           {node.title}
         </h1>
-      </div>
+        <p className="sky-page-copy mt-3 max-w-2xl text-sm leading-7">
+          AI 会围绕该知识点生成讲解、例题和易错提醒。正文中的任意内容都可以划线提问、翻译或朗读。
+        </p>
+      </section>
 
       {generating && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
-          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+        <div className="sky-card p-4">
+          <div className="flex items-center gap-2 text-sm text-sky-700 dark:text-sky-200">
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -242,13 +245,13 @@ export function KnowledgeContent({ id }: { id: string }) {
       )}
 
       {generateError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">
+        <div className="rounded-xl border border-rose-200 bg-rose-50/85 p-4 dark:border-rose-900/60 dark:bg-rose-950/25">
+          <p className="text-sm text-rose-600 dark:text-rose-300">
             生成失败：{generateError}
           </p>
           <button
             onClick={() => generateContent()}
-            className="mt-2 text-sm text-red-600 underline hover:text-red-700 dark:text-red-400"
+            className="mt-3 rounded-full border border-rose-200 bg-white/70 px-3 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-900/60 dark:bg-rose-950/35 dark:text-rose-300 dark:hover:bg-rose-950/55"
           >
             点击重试
           </button>
@@ -256,38 +259,43 @@ export function KnowledgeContent({ id }: { id: string }) {
       )}
 
       {node.content && (
-        <MarkdownRenderer
-          content={node.content}
-          className="knowledge-content max-w-none text-sm leading-relaxed"
-          hideAnswerSections
-        />
+        <section className="sky-card p-6">
+          <MarkdownRenderer
+            content={node.content}
+            className="knowledge-content max-w-none text-sm leading-relaxed"
+            hideAnswerSections
+          />
+        </section>
       )}
 
       {generatedExamples && (
-        <div className="mt-8 rounded-lg border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
+        <section className="sky-card p-6">
+          <div className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-200">
+            New Examples
+          </div>
           <MarkdownRenderer
             content={generatedExamples}
             className="knowledge-content max-w-none text-sm leading-relaxed"
             hideAnswerSections
           />
-        </div>
+        </section>
       )}
 
       {examplesError && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-xl border border-rose-200 bg-rose-50/85 p-4 text-sm text-rose-600 dark:border-rose-900/60 dark:bg-rose-950/25 dark:text-rose-300">
           {examplesError}
         </div>
       )}
 
 
       {node.content && (
-        <div className="relative mt-6 flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+        <div className="sky-card relative flex flex-wrap items-center gap-3 p-4">
   
         {promptTarget && (
           <div role="dialog"
             aria-modal="false"
-            className="absolute bottom-full left-0 z-50 mb-3 w-[min(32rem,calc(100vw-2rem))] rounded-lg border border-zinc-200 bg-white p-4 shadow-2xl ring-1 ring-black/5 dark:border-zinc-700 dark:bg-zinc-900">
-            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            className="sky-floating absolute bottom-full left-0 z-50 mb-3 w-[min(34rem,calc(100vw-2rem))] p-4">
+            <label className="sky-floating-title mb-2 block">
               {promptTarget === 'content' ? '重新生成讲解要求' : '重新生成例题要求'}
             </label>
             <textarea
@@ -300,14 +308,14 @@ export function KnowledgeContent({ id }: { id: string }) {
                   ? '例如：讲解更适合基础薄弱学生，多举生活化例句。留空则按默认要求生成。'
                   : '例如：题目偏贵州中考真题风格，重点考易错点，解析更详细。留空则按默认要求生成。'
               }
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm leading-relaxed text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              className="w-full rounded-lg border border-sky-200 bg-white/90 px-3 py-2 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20 dark:border-sky-900/70 dark:bg-slate-900/80 dark:text-sky-100"
             />
             <div className="mt-3 flex items-center gap-2">
               <button
                 type="button"
                 onClick={submitCustomPrompt}
                 disabled={generating || generatingExamples}
-                className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:from-blue-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="sky-button-primary rounded-lg px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {promptTarget === 'content'
                   ? generating ? '正在生成讲解...' : '生成讲解'
@@ -320,7 +328,7 @@ export function KnowledgeContent({ id }: { id: string }) {
                   setCustomPrompt('')
                 }}
                 disabled={generating || generatingExamples}
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="sky-button-secondary rounded-lg px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 取消
               </button>
@@ -328,14 +336,14 @@ export function KnowledgeContent({ id }: { id: string }) {
           </div>
         )}
           {node.contentGenerated && (
-            <span className="rounded-full bg-green-50 px-2.5 py-0.5 text-xs text-green-600 dark:bg-green-900/20 dark:text-green-400">
+            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300">
               已缓存
             </span>
           )}
           <button
             onClick={() => openPromptBox('examples')}
             disabled={generatingExamples || generating}
-            className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:from-blue-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="sky-button-primary rounded-lg px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {generatingExamples ? '正在生成例题...' : '重新生成例题'}
           </button>
@@ -346,7 +354,7 @@ export function KnowledgeContent({ id }: { id: string }) {
                 openPromptBox('content')
               }}
               disabled={generating || generatingExamples}
-              className="rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-xs font-medium text-purple-700 shadow-sm transition-colors hover:border-purple-300 hover:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800/70 dark:bg-purple-900/30 dark:text-purple-200 dark:hover:bg-purple-900/50"
+              className="sky-button-secondary rounded-lg px-3 py-2 text-xs font-medium shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               重新生成讲解
             </button>

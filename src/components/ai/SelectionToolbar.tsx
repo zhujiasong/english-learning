@@ -240,7 +240,7 @@ export function GlobalSelectionToolbar() {
     if (!toolbar || !settings.provider || !settings.apiKey) return
     const text = toolbar.text
     const margin = 12
-    const boxWidth = Math.min(320, window.innerWidth - margin * 2)
+    const boxWidth = Math.min(360, window.innerWidth - margin * 2)
     const boxHeightEstimate = 280
     const x = Math.min(
       Math.max(toolbar.x - boxWidth / 2, margin),
@@ -393,7 +393,7 @@ export function GlobalSelectionToolbar() {
 
   const clampTranslatePosition = useCallback((x: number, y: number) => {
     const margin = 12
-    const width = translateBoxRef.current?.offsetWidth ?? Math.min(320, window.innerWidth - margin * 2)
+    const width = translateBoxRef.current?.offsetWidth ?? Math.min(360, window.innerWidth - margin * 2)
     const height = translateBoxRef.current?.offsetHeight ?? 280
     return {
       x: Math.min(Math.max(x, margin), Math.max(margin, window.innerWidth - width - margin)),
@@ -444,23 +444,23 @@ export function GlobalSelectionToolbar() {
             top: toolbar.align === 'top' ? toolbar.y - 44 : toolbar.y + 12,
           }}
         >
-          <div className="flex items-center gap-0.5 rounded-lg border border-cyan-200/80 bg-white/95 p-1 shadow-xl shadow-cyan-500/15 ring-1 ring-purple-500/10 backdrop-blur dark:border-cyan-800/60 dark:bg-zinc-900/95">
+          <div className="sky-floating flex items-center gap-1 p-1.5">
             <button
               onClick={handleQuestion}
-              className="rounded px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-900/30"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-sky-700 transition-colors hover:bg-sky-50 dark:text-sky-200 dark:hover:bg-sky-900/30"
             >
               提问
             </button>
             <button
               onClick={handleTranslate}
               disabled={translating}
-              className="rounded px-2.5 py-1 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-300 dark:hover:bg-emerald-900/30"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-cyan-700 transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:text-cyan-200 dark:hover:bg-cyan-900/30"
             >
               {translating ? '翻译中...' : '翻译'}
             </button>
             <button
               onClick={handleReadAloud}
-              className="rounded px-2.5 py-1 text-xs font-medium text-purple-600 transition-colors hover:bg-purple-50 dark:text-purple-300 dark:hover:bg-purple-900/30"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 dark:text-blue-200 dark:hover:bg-blue-900/30"
             >
               朗读
             </button>
@@ -473,7 +473,7 @@ export function GlobalSelectionToolbar() {
         <div
           ref={translateBoxRef}
           data-selection-toolbar
-          className="fixed z-50 max-h-[70vh] w-80 max-w-[calc(100vw-1.5rem)] overflow-auto rounded-lg border border-emerald-200/80 bg-white/95 shadow-2xl ring-1 ring-emerald-500/10 backdrop-blur dark:border-emerald-800/60 dark:bg-zinc-900/95"
+          className="sky-floating fixed z-50 max-h-[70vh] w-[22.5rem] max-w-[calc(100vw-1.5rem)] overflow-hidden"
           style={
             translatePosition
               ? { left: translatePosition.x, top: translatePosition.y }
@@ -481,13 +481,13 @@ export function GlobalSelectionToolbar() {
           }
         >
           <div
-            className={`flex cursor-move touch-none select-none items-center justify-between border-b border-emerald-100 px-4 py-2 dark:border-emerald-900/60 ${draggingTranslate ? 'cursor-grabbing' : ''}`}
+            className={`flex cursor-move touch-none select-none items-center justify-between border-b border-sky-100/80 bg-white/35 px-4 py-3 dark:border-sky-900/50 dark:bg-sky-950/20 ${draggingTranslate ? 'cursor-grabbing' : ''}`}
             onPointerDown={handleTranslateDragStart}
             onPointerMove={handleTranslateDragMove}
             onPointerUp={handleTranslateDragEnd}
             onPointerCancel={handleTranslateDragEnd}
           >
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-300">翻译结果</span>
+            <span className="sky-floating-title">AI Translate</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
@@ -497,22 +497,22 @@ export function GlobalSelectionToolbar() {
                   setTranslatePosition(null)
                   clearSelection()
                 }}
-                className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                className="rounded-full px-2 py-1 text-xs font-medium text-sky-500 transition-colors hover:bg-sky-50 hover:text-sky-700 dark:text-sky-200 dark:hover:bg-sky-900/40"
               >
                 关闭
               </button>
             </div>
           </div>
-          <div className="p-4">
-            <div className="mb-3 rounded border border-emerald-100 bg-emerald-50/70 p-3 text-xs leading-relaxed text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-100">
-              <div className="mb-2 font-semibold text-emerald-700 dark:text-emerald-300">原文</div>
+          <div className="max-h-[calc(70vh-3.5rem)] space-y-3 overflow-auto p-4 [scrollbar-color:rgba(14,165,233,0.35)_transparent]">
+            <div className="rounded-xl border border-sky-100 bg-white/65 p-3 text-xs leading-relaxed text-sky-950 dark:border-sky-900/60 dark:bg-slate-900/45 dark:text-sky-100">
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-200">Source</div>
               <div className="flex items-center gap-2">
                 <div className="whitespace-pre-wrap text-sm">{translateSourceText}</div>
                 <button
                   type="button"
                   onClick={() => speakText(translateSourceText)}
                   aria-label="朗读原文"
-                  className="shrink-0 rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                  className="sky-icon-button h-7 w-7 shrink-0"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 5 6 9H3v6h3l5 4V5Z" />
@@ -522,12 +522,12 @@ export function GlobalSelectionToolbar() {
                 </button>
               </div>
             </div>
-            <div className="rounded bg-gradient-to-br from-emerald-50 via-cyan-50 to-white p-3 text-sm leading-relaxed text-zinc-800 dark:from-emerald-950/40 dark:via-cyan-950/30 dark:to-zinc-800/70 dark:text-zinc-100">
-              <div className="mb-2 font-semibold text-cyan-700 dark:text-cyan-300">译文</div>
+            <div className="rounded-xl border border-cyan-100 bg-gradient-to-br from-sky-50 via-cyan-50 to-white p-3 text-sm leading-relaxed text-slate-800 dark:border-cyan-900/50 dark:from-sky-950/40 dark:via-cyan-950/30 dark:to-slate-900/70 dark:text-sky-100">
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-200">Translation</div>
               {translateResult ? (
                 <>
                   <div className="mb-4 flex items-center gap-2">
-                    <div className="text-lg font-semibold text-pink-500 dark:text-pink-300">
+                    <div className="text-lg font-semibold text-sky-700 dark:text-sky-200">
                       {getPrimaryTranslationText(translateResult)}
                     </div>
                     <button
@@ -535,7 +535,7 @@ export function GlobalSelectionToolbar() {
                       onClick={() => speakText(getPrimaryTranslationText(translateResult))}
                       aria-label="朗读译文"
                       disabled={!getPrimaryTranslationText(translateResult)}
-                      className="shrink-0 rounded p-1 text-cyan-600 transition-colors hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-cyan-300 dark:hover:bg-cyan-900/40"
+                      className="sky-icon-button h-7 w-7 shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 5 6 9H3v6h3l5 4V5Z" />

@@ -150,14 +150,19 @@ export function AIPanel({
   return (
     <div className="pointer-events-none fixed inset-0 z-40">
       <div className="ai-panel pointer-events-auto">
-        <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
-          <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
-            {title}
-          </h3>
+        <div className="flex shrink-0 items-center justify-between border-b border-sky-200/80 bg-white/40 px-4 py-3 dark:border-sky-900/60 dark:bg-sky-950/20">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-700/70 dark:text-cyan-200/70">
+              AI Tutor
+            </div>
+            <h3 className="mt-0.5 font-semibold text-sky-950 dark:text-sky-100">
+              {title}
+            </h3>
+          </div>
           <button
             onClick={onClose}
             aria-label="关闭"
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+            className="rounded-full p-1.5 text-sky-500 hover:bg-sky-100 hover:text-sky-700 dark:text-sky-300 dark:hover:bg-sky-900/40"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -167,7 +172,7 @@ export function AIPanel({
 
         <div
           ref={contentRef}
-          className="flex-1 space-y-4 overflow-auto p-4"
+          className="flex-1 space-y-4 overflow-auto p-4 [scrollbar-color:rgba(14,165,233,0.35)_transparent]"
         >
           {messages.map((msg, i) => (
             <div
@@ -179,8 +184,8 @@ export function AIPanel({
               <div
                 className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200'
+                    ? 'bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-sm shadow-sky-500/20'
+                    : 'border border-sky-100 bg-white/85 text-slate-800 shadow-sm dark:border-sky-900/50 dark:bg-slate-900/70 dark:text-sky-100'
                 }`}
               >
                 <MarkdownRenderer
@@ -192,14 +197,14 @@ export function AIPanel({
           ))}
           {loading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start">
-              <div className="rounded-lg bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-800">
-                <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-blue-500" />
+              <div className="rounded-lg border border-sky-100 bg-white/85 px-3 py-2 text-sm dark:border-sky-900/50 dark:bg-slate-900/70">
+                <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-sky-500" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="shrink-0 border-t border-zinc-200 p-3 dark:border-zinc-700">
+        <div className="shrink-0 border-t border-sky-200/80 bg-white/45 p-3 dark:border-sky-900/60 dark:bg-sky-950/20">
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -207,14 +212,14 @@ export function AIPanel({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="输入追问..."
+              placeholder="输入问题或者鼠标选中页面内容提问"
               disabled={loading}
-              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              className="flex-1 rounded-lg border border-sky-200 bg-white/90 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-sky-400 focus:outline-none disabled:opacity-50 dark:border-sky-900/70 dark:bg-slate-900/80 dark:text-sky-100"
             />
             <button
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+              className="sky-button-primary rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               发送
             </button>

@@ -117,16 +117,16 @@ function HiddenAnswerBlock({ content, index }: { content: string; index: number 
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="my-3 rounded-lg border border-purple-200 bg-purple-50/70 p-3 dark:border-purple-800/70 dark:bg-purple-950/30">
+    <div className="my-3 rounded-lg border border-sky-200 bg-sky-50/70 p-3 dark:border-sky-900/70 dark:bg-sky-950/30">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="rounded-lg bg-purple-100 px-3 py-1.5 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:bg-purple-900/50 dark:text-purple-200 dark:hover:bg-purple-900"
+        className="sky-button-secondary rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
       >
         {open ? '收起答案' : `查看答案/解析${index > 1 ? ` ${index}` : ''}`}
       </button>
       {open && (
-        <div className="mt-3 border-t border-purple-200 pt-3 dark:border-purple-800/70">
+        <div className="mt-3 border-t border-sky-200 pt-3 dark:border-sky-900/70">
           <MarkdownBlock content={content} />
         </div>
       )}

@@ -14,15 +14,22 @@ export default async function KnowledgeDetailPage({
   const { id } = await params
 
   return (
-    <div>
+    <div className="space-y-4">
       <BackButton href="/knowledge" />
-      <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="lg:sticky lg:top-16 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto">
-          <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-              知识目录
+      <div className="grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-auto">
+          <div className="sky-card overflow-hidden">
+            <div className="border-b border-sky-100/80 bg-white/40 px-4 py-3 dark:border-sky-900/50 dark:bg-sky-950/20">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700/70 dark:text-cyan-200/70">
+                Catalog
+              </div>
+              <div className="mt-1 text-sm font-semibold text-sky-950 dark:text-sky-100">
+                知识目录
+              </div>
             </div>
-            <KnowledgeTree activeId={id} compact />
+            <div className="p-3">
+              <KnowledgeTree activeId={id} compact />
+            </div>
           </div>
         </aside>
         <KnowledgeContent id={id} />

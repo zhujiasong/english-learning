@@ -23,47 +23,71 @@ export default function ExamListPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const realCount = papers.filter((paper) => paper.type === 'real').length
+  const mockCount = papers.length - realCount
+
   return (
-    <div>
-      <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-        真题模拟
-      </h1>
-      <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-        历年真题和模拟试卷，逐题练习，AI点拨。做题时先自己思考，遇到困难再求助AI。
-      </p>
+    <div className="space-y-6">
+      <section className="sky-hero px-8 py-8">
+        <div className="grid items-end gap-6 lg:grid-cols-[1fr_18rem]">
+          <div>
+            <div className="sky-hero-kicker">Exam Practice</div>
+            <h1 className="sky-page-title mt-3 text-3xl font-semibold">
+              真题模拟
+            </h1>
+            <p className="sky-page-copy mt-3 max-w-2xl text-sm leading-7">
+              历年真题和模拟试卷集中练习。先自己完成判断，再通过 AI 点拨理解题干、选项和考点。
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-sky-100 bg-white/70 p-4 dark:border-sky-900/50 dark:bg-slate-900/45">
+              <div className="text-2xl font-semibold text-sky-700 dark:text-sky-200">{realCount}</div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-sky-100/60">真题</div>
+            </div>
+            <div className="rounded-xl border border-cyan-100 bg-white/70 p-4 dark:border-cyan-900/50 dark:bg-slate-900/45">
+              <div className="text-2xl font-semibold text-cyan-700 dark:text-cyan-200">{mockCount}</div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-sky-100/60">模拟</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {loading ? (
         <Loading text="加载试卷列表..." />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-3">
           {papers.map((paper) => (
             <Link
               key={paper.id}
-              href={`/exam/${paper.id}`}
-              className="group rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700 dark:hover:bg-blue-900/10"
+              href={'/exam/' + paper.id}
+              className="group sky-card sky-card-hover flex min-h-36 flex-col p-5"
             >
-              <div className="flex items-center gap-2 mb-1">
+              <div className="mb-4 flex items-center gap-2">
                 <span
-                  className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    paper.type === 'real'
-                      ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                      : 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400'
-                  }`}
+                  className={
+                    'rounded-full px-2.5 py-1 text-xs font-medium ' +
+                    (paper.type === 'real'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-300'
+                      : 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-300')
+                  }
                 >
                   {paper.type === 'real' ? '真题' : '模拟'}
                 </span>
-                <span className="text-xs text-zinc-400">{paper.year}</span>
+                <span className="text-xs text-slate-400">{paper.year}</span>
               </div>
-              <h2 className="text-sm font-medium text-zinc-800 group-hover:text-blue-600 dark:text-zinc-200 dark:group-hover:text-blue-400">
+              <h2 className="text-base font-semibold leading-6 text-slate-900 group-hover:text-sky-700 dark:text-sky-100 dark:group-hover:text-sky-200">
                 {paper.title}
               </h2>
+              <span className="mt-auto pt-5 text-sm font-medium text-sky-700 dark:text-sky-200">
+                开始练习
+              </span>
             </Link>
           ))}
         </div>
       )}
 
       {!loading && papers.length === 0 && (
-        <div className="py-12 text-center text-zinc-500">
+        <div className="sky-card py-12 text-center text-sm text-slate-500 dark:text-sky-100/70">
           暂无试卷，请先运行数据库初始化。
         </div>
       )}

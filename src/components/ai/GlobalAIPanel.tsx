@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -31,11 +30,6 @@ export function GlobalAIPanelProvider({ children }: { children: ReactNode }) {
   const [initialMessage, setInitialMessage] = useState('')
   const [initialMessageKey, setInitialMessageKey] = useState(0)
 
-  useEffect(() => {
-    const shouldOpenByDefault = window.matchMedia('(min-width: 1280px)').matches
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOpen(shouldOpenByDefault)
-  }, [])
 
   const ask = useCallback((message: string, options?: AskAIOptions) => {
     setTitle(options?.title ?? 'AI 问答')
@@ -61,7 +55,8 @@ export function GlobalAIPanelProvider({ children }: { children: ReactNode }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed right-4 top-1/2 z-40 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-200 bg-gradient-to-br from-blue-500 to-cyan-500 text-sm font-bold text-white shadow-lg shadow-cyan-500/20 transition-colors hover:from-blue-600 hover:to-cyan-600 dark:border-cyan-800"
+          aria-label="打开 AI 问答"
+          className="fixed right-4 top-1/2 z-40 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-sky-200 bg-gradient-to-br from-sky-500 via-blue-500 to-cyan-400 text-sm font-bold text-white shadow-xl shadow-sky-500/25 ring-4 ring-white/55 transition-colors hover:from-sky-600 hover:via-blue-600 hover:to-cyan-500 dark:border-sky-800 dark:ring-sky-950/50"
         >
           AI
         </button>

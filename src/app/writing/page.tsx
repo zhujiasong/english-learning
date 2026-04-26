@@ -32,17 +32,23 @@ export default function WritingPage() {
 
   if (!settings.provider || !settings.apiKey) {
     return (
-      <div>
+      <div className="space-y-6">
         <BackButton href="/" />
-        <h1 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          作文练习
-        </h1>
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center dark:border-yellow-800 dark:bg-yellow-900/20">
-          <p className="text-sm text-yellow-700 dark:text-yellow-400">
+        <section className="sky-hero px-8 py-8">
+          <div className="sky-hero-kicker">Writing Coach</div>
+          <h1 className="sky-page-title mt-3 text-3xl font-semibold">
+            作文练习
+          </h1>
+          <p className="sky-page-copy mt-3 max-w-2xl text-sm leading-7">
+            选择写作任务后，AI 会从审题、结构、句式、表达和中考评分角度进行批改。
+          </p>
+        </section>
+        <div className="sky-card p-6 text-center">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
             请先前往
             <Link
               href="/settings"
-              className="mx-1 font-medium text-blue-600 underline dark:text-blue-400"
+              className="mx-1 font-medium text-sky-700 underline dark:text-sky-200"
             >
               模型配置
             </Link>
@@ -58,7 +64,7 @@ export default function WritingPage() {
       <div>
         <button
           onClick={() => setSelectedTask(null)}
-          className="mb-4 flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+          className="mb-4 flex items-center gap-1 text-sm text-sky-700/80 hover:text-sky-900 dark:text-sky-200/70 dark:hover:text-sky-100"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -71,28 +77,43 @@ export default function WritingPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <BackButton href="/" />
-      <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-        作文练习
-      </h1>
-      <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-        选择一个题目开始写作，提交后AI将进行深度批改：审题分析、逐句批改、结构评估、综合评分。
-      </p>
+      <section className="sky-hero px-8 py-8">
+        <div className="grid items-end gap-6 lg:grid-cols-[1fr_18rem]">
+          <div>
+            <div className="sky-hero-kicker">Writing Coach</div>
+            <h1 className="sky-page-title mt-3 text-3xl font-semibold">
+              作文练习
+            </h1>
+            <p className="sky-page-copy mt-3 max-w-2xl text-sm leading-7">
+              从典型中考写作任务开始练习。提交作文后，AI 会给出审题分析、逐句批改、结构评估和综合评分。
+            </p>
+          </div>
+          <div className="rounded-xl border border-sky-100 bg-white/70 p-4 dark:border-sky-900/50 dark:bg-slate-900/45">
+            <div className="text-2xl font-semibold text-sky-700 dark:text-sky-200">3</div>
+            <div className="mt-1 text-xs text-slate-500 dark:text-sky-100/60">精选写作任务</div>
+          </div>
+        </div>
+      </section>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
         {sampleTasks.map((task, i) => (
           <button
             key={i}
             onClick={() => setSelectedTask(task)}
-            className="rounded-lg border border-zinc-200 bg-white p-4 text-left transition-colors hover:border-purple-300 hover:bg-purple-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-700 dark:hover:bg-purple-900/10"
+            className="sky-card sky-card-hover flex min-h-52 flex-col p-5 text-left"
           >
-            <h3 className="mb-1.5 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+            <div className="mb-4 h-1.5 w-14 rounded-full bg-gradient-to-r from-sky-500 to-cyan-400" />
+            <h3 className="text-base font-semibold text-sky-950 dark:text-sky-100">
               {task.title}
             </h3>
-            <p className="line-clamp-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 whitespace-pre-wrap">
+            <p className="mt-3 line-clamp-5 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-sky-100/75">
               {task.requirement}
             </p>
+            <span className="mt-auto pt-5 text-sm font-medium text-sky-700 dark:text-sky-200">
+              开始写作
+            </span>
           </button>
         ))}
       </div>
