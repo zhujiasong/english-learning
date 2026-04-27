@@ -29,7 +29,11 @@ export async function GET(
       })),
     }
 
-    return NextResponse.json(paperWithParsedOptions)
+    return NextResponse.json(paperWithParsedOptions, {
+      headers: {
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=300',
+      },
+    })
   } catch {
     return NextResponse.json({ error: '获取试卷失败' }, { status: 500 })
   }

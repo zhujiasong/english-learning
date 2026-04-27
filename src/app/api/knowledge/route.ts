@@ -4,11 +4,22 @@ import { prisma } from '@/lib/db/prisma'
 export async function GET() {
   try {
     const nodes = await prisma.knowledgeNode.findMany({
-      orderBy: { sortOrder: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        parentId: true,
+        level: true,
+        sortOrder: true,
+        category: true,
+        contentGenerated: true,
+        updatedAt: true,
+      },
+      orderBy: [{ level: 'asc' }, { sortOrder: 'asc' }],
     })
 
-    const nodeMap = new Map<string, typeof nodes[number] & { children: typeof nodes }>()
-    const roots: (typeof nodes[number] & { children: typeof nodes })[] = []
+    type KnowledgeTreeNode = (typeof nodes)[number] & { children: KnowledgeTreeNode[] }
+    const nodeMap = new Map<string, KnowledgeTreeNode>()
+    const roots: KnowledgeTreeNode[] = []
 
     for (const node of nodes) {
       nodeMap.set(node.id, { ...node, children: [] })
@@ -23,7 +34,11 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json(roots)
+    return NextResponse.json(roots, {
+      headers: {
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=300',
+      },
+    })
   } catch {
     return NextResponse.json(
       { error: '获取知识点失败' },

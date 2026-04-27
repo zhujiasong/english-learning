@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -20,7 +20,7 @@ const answerHeadingPattern =
   /^\s*#{1,6}\s*(?:正确答案|参考答案|答案解析|详细解析|答案|解析)\s*$/
 const nextQuestionPattern =
   /^(?:(?:第\s*)?[\d一二三四五六七八九十]+\s*[题.、)]|例题\s*[\d一二三四五六七八九十]+|题目\s*[\d一二三四五六七八九十]+|Question\s*\d+)/i
-
+const remarkPlugins = [remarkGfm]
 
 function normalizeMarkdownLine(line: string) {
   return line
@@ -109,9 +109,9 @@ function splitAnswerSections(content: string): MarkdownSegment[] {
   return segments
 }
 
-function MarkdownBlock({ content }: { content: string }) {
-  return <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-}
+const MarkdownBlock = memo(function MarkdownBlock({ content }: { content: string }) {
+  return <ReactMarkdown remarkPlugins={remarkPlugins}>{content}</ReactMarkdown>
+})
 
 function HiddenAnswerBlock({ content, index }: { content: string; index: number }) {
   const [open, setOpen] = useState(false)

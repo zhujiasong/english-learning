@@ -92,6 +92,11 @@ npm start
 ```bash
 docker build -t english-learning .
 ```
+构建镜像使用华为云：
+
+```bash
+docker build --build-arg NPM_REGISTRY=https://mirrors.huaweicloud.com/repository/npm/ -t english-learning .
+```
 
 运行容器：
 

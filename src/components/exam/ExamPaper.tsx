@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { QuestionCard } from './QuestionCard'
 import { Loading } from '@/components/ui/Loading'
 
@@ -34,6 +34,11 @@ export function ExamPaperView({ paperId }: { paperId: string }) {
       .finally(() => setLoading(false))
   }, [paperId])
 
+  const sortedQuestions = useMemo(
+    () => paper ? [...paper.questions].sort((a, b) => a.sortOrder - b.sortOrder) : [],
+    [paper]
+  )
+
   if (loading) return <Loading text="加载试卷中..." />
 
   if (!paper) {
@@ -65,11 +70,9 @@ export function ExamPaperView({ paperId }: { paperId: string }) {
       </section>
 
       <div className="space-y-6">
-        {paper.questions
-          .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map((q) => (
-            <QuestionCard key={q.id} question={q} />
-          ))}
+        {sortedQuestions.map((q) => (
+          <QuestionCard key={q.id} question={q} />
+        ))}
       </div>
     </div>
   )

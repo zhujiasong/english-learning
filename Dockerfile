@@ -1,4 +1,4 @@
-ARG NODE_IMAGE=node:22-slim
+ARG NODE_IMAGE=docker.m.daocloud.io/library/node:22-slim
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
 FROM ${NODE_IMAGE} AS deps
@@ -7,9 +7,9 @@ ARG NPM_REGISTRY
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 RUN npm config set registry ${NPM_REGISTRY} \
-  && npm install --include=dev --no-audit --no-fund
+  && npm ci --include=dev --no-audit --no-fund
 
 FROM deps AS builder
 

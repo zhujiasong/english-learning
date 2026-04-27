@@ -9,7 +9,12 @@ export async function GET(
     const { id } = await params
     const node = await prisma.knowledgeNode.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        contentGenerated: true,
+        updatedAt: true,
         parent: {
           select: { id: true, title: true },
         },

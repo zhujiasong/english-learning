@@ -32,6 +32,11 @@ const categoryTokens: Record<string, string> = {
   cloze: 'C',
 }
 
+const KNOWLEDGE_TREE_CACHE_TTL_MS = 60_000
+
+let knowledgeTreeCache: { data: TreeNode[]; expiresAt: number } | null = null
+let knowledgeTreeRequest: Promise<TreeNode[]> | null = null
+
 function getCategoryLabel(category: string) {
   return categoryLabels[category] ?? category
 }
@@ -157,6 +162,33 @@ function findPathToNode(nodes: TreeNode[], targetId: string): string[] {
   return []
 }
 
+async function getKnowledgeTree() {
+  const now = Date.now()
+  if (knowledgeTreeCache && knowledgeTreeCache.expiresAt > now) {
+    return knowledgeTreeCache.data
+  }
+
+  if (!knowledgeTreeRequest) {
+    knowledgeTreeRequest = fetch('/api/knowledge')
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch knowledge tree')
+        return r.json() as Promise<TreeNode[]>
+      })
+      .then((data) => {
+        knowledgeTreeCache = {
+          data,
+          expiresAt: Date.now() + KNOWLEDGE_TREE_CACHE_TTL_MS,
+        }
+        return data
+      })
+      .finally(() => {
+        knowledgeTreeRequest = null
+      })
+  }
+
+  return knowledgeTreeRequest
+}
+
 export function KnowledgeTree({
   activeId,
   compact = false,
@@ -169,15 +201,25 @@ export function KnowledgeTree({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/knowledge')
-      .then((r) => r.json())
+    let cancelled = false
+
+    getKnowledgeTree()
       .then((data: TreeNode[]) => {
+        if (cancelled) return
         const localTree = applyLocalContentState(data)
         setTree(localTree)
         setExpanded(new Set())
       })
-      .catch(() => setTree([]))
-      .finally(() => setLoading(false))
+      .catch(() => {
+        if (!cancelled) setTree([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {

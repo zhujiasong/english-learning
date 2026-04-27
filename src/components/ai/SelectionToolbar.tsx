@@ -75,6 +75,7 @@ export function GlobalSelectionToolbar() {
   const { settings } = useSettings()
   const { ask } = useGlobalAIPanel()
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null)
+  const lastToolbarRef = useRef<ToolbarState | null>(null)
   const translateBoxRef = useRef<HTMLDivElement>(null)
   const translateDragOffsetRef = useRef({ x: 0, y: 0 })
   const [toolbar, setToolbar] = useState<ToolbarState | null>(null)
@@ -84,6 +85,25 @@ export function GlobalSelectionToolbar() {
   const [translatePosition, setTranslatePosition] = useState<{ x: number; y: number } | null>(null)
   const [draggingTranslate, setDraggingTranslate] = useState(false)
   const [translating, setTranslating] = useState(false)
+
+  const updateToolbar = useCallback((next: ToolbarState | null) => {
+    const prev = lastToolbarRef.current
+    const isSame =
+      (!prev && !next) ||
+      Boolean(
+        prev &&
+          next &&
+          prev.text === next.text &&
+          prev.x === next.x &&
+          prev.y === next.y &&
+          prev.align === next.align &&
+          prev.onQuestion === next.onQuestion
+      )
+
+    if (isSame) return
+    lastToolbarRef.current = next
+    setToolbar(next)
+  }, [])
 
   useEffect(() => {
     let checkTimer: ReturnType<typeof setTimeout> | null = null
@@ -127,7 +147,7 @@ export function GlobalSelectionToolbar() {
           y: window.innerHeight / 2,
         }
         const align = point.y > 72 ? 'top' : 'bottom'
-        setToolbar({
+        updateToolbar({
           text: formSelection.text,
           x: Math.min(Math.max(point.x, 120), window.innerWidth - 120),
           y: point.y,
@@ -144,7 +164,7 @@ export function GlobalSelectionToolbar() {
         !selection.toString().trim() ||
         selection.rangeCount === 0
       ) {
-        setToolbar(null)
+        updateToolbar(null)
         return
       }
 
@@ -159,7 +179,7 @@ export function GlobalSelectionToolbar() {
         anchorElement?.closest('[data-selection-toolbar]') ||
         focusElement?.closest('[data-selection-toolbar]')
       ) {
-        setToolbar(null)
+        updateToolbar(null)
         return
       }
 
@@ -168,7 +188,7 @@ export function GlobalSelectionToolbar() {
       const range = selection.getRangeAt(0)
       const rect = range.getBoundingClientRect()
       if (!text || (rect.width === 0 && rect.height === 0)) {
-        setToolbar(null)
+        updateToolbar(null)
         return
       }
 
@@ -177,7 +197,7 @@ export function GlobalSelectionToolbar() {
         y: rect.bottom,
       }
       const align = point.y > 72 ? 'top' : 'bottom'
-      setToolbar({
+      updateToolbar({
         text,
         x: Math.min(Math.max(point.x, 120), window.innerWidth - 120),
         y: point.y,
@@ -188,7 +208,7 @@ export function GlobalSelectionToolbar() {
 
     const scheduleSelectionCheck = () => {
       clearCheckTimer()
-      checkTimer = setTimeout(checkSelection, 30)
+      checkTimer = setTimeout(checkSelection, 1000)
     }
 
     const schedulePointerSelectionCheck = (event: MouseEvent | PointerEvent) => {
@@ -202,7 +222,7 @@ export function GlobalSelectionToolbar() {
       const target = e.target as HTMLElement
       if (target.closest('[data-selection-toolbar]')) return
       clearCheckTimer()
-      setToolbar(null)
+      updateToolbar(null)
       setShowTranslate(false)
       setTranslateSourceText('')
       setTranslateResult('')
@@ -222,7 +242,7 @@ export function GlobalSelectionToolbar() {
       document.removeEventListener('selectionchange', scheduleSelectionCheck)
       document.removeEventListener('mousedown', handleMouseDown)
     }
-  }, [])
+  }, [updateToolbar])
 
   const clearSelection = useCallback(() => {
     window.getSelection()?.removeAllRanges()
@@ -233,8 +253,8 @@ export function GlobalSelectionToolbar() {
     ) {
       activeElement.blur()
     }
-    setToolbar(null)
-  }, [])
+    updateToolbar(null)
+  }, [updateToolbar])
 
   const handleTranslate = useCallback(async () => {
     if (!toolbar || !settings.provider || !settings.apiKey) return
