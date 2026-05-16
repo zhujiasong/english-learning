@@ -77,6 +77,8 @@ docker build \
 docker run -d \
   --name english-learning \
   -p 3000:3000 \
+  --memory=512m \
+  --memory-swap=512m \
   --restart unless-stopped \
   english-learning
 ```
@@ -139,6 +141,8 @@ docker run -d \
   --name english-learning \
   -p 3000:3000 \
   -v /data/english-learning/prisma:/app/prisma \
+  --memory=512m \
+  --memory-swap=512m \
   --restart unless-stopped \
   english-learning
 ```

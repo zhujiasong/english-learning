@@ -33,6 +33,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 ENV DATABASE_URL=file:./prisma/dev.db
+ENV NODE_OPTIONS=--max-old-space-size=256
+ENV UV_THREADPOOL_SIZE=4
 
 RUN groupadd --system --gid 1001 nodejs \
   && useradd --system --uid 1001 nextjs
